@@ -362,16 +362,51 @@
                 <div class="success-sub">也许下次吧~</div>
             </div>
         </div>
+
+        <!-- Result Page (shown when ?result=true) -->
+        <div id="resultPage" class="hidden">
+            <div class="heart-icon">💕</div>
+            <h1>申请结果</h1>
+            <div class="invite-info">
+                <h2>您的约会申请</h2>
+                <div class="info-item">
+                    <span class="info-label">📅 日期</span>
+                    <span class="info-value" id="resultDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">⏰ 时间</span>
+                    <span class="info-value" id="resultTime">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📍 地点</span>
+                    <span class="info-value" id="resultLocation">-</span>
+                </div>
+            </div>
+            <div id="resultStatus"></div>
+        </div>
     </div>
 
     <script>
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const isConfirmMode = urlParams.get('confirm') === 'true';
+        const isResultMode = urlParams.get('result') === 'true';
+        const urlData = urlParams.get('data'); // 编码在URL中的数据
 
         // Get stored data
-        const storedData = localStorage.getItem('dateInvitation');
+        let storedData = localStorage.getItem('dateInvitation');
+        let resultData = localStorage.getItem('dateResult');
         let invitationData = storedData ? JSON.parse(storedData) : null;
+        let finalResultData = resultData ? JSON.parse(resultData) : null;
+
+        // 如果URL中有编码数据，优先使用（用于分享给其他人）
+        if (urlData) {
+            try {
+                invitationData = JSON.parse(atob(urlData));
+            } catch (e) {
+                console.error('解析邀请数据失败');
+            }
+        }
 
         // Set minimum date to today
         function initDateInput() {
@@ -421,33 +456,38 @@
             document.getElementById('formPage').classList.add('hidden');
             document.getElementById('successPage').classList.remove('hidden');
             
-            // Generate shareable link
-            const shareUrl = window.location.origin + window.location.pathname + '?confirm=true';
+            // Generate shareable link with encoded data
+            const encodedData = btoa(JSON.stringify(data));
+            const shareUrl = window.location.origin + window.location.pathname + '?confirm=true&data=' + encodedData;
             console.log('分享链接:', shareUrl);
             alert('申请已创建！\n\n分享链接（发送给ta）：\n' + shareUrl);
         });
 
         // Handle confirmation
         function handleConfirm() {
-            if (invitationData) {
-                invitationData.status = 'accepted';
-                localStorage.setItem('dateInvitation', JSON.stringify(invitationData));
-            }
+            // 生成结果链接，申请方打开这个链接可以看到结果
+            const resultData = { ...invitationData, status: 'accepted' };
+            const encodedResult = btoa(JSON.stringify(resultData));
+            const resultUrl = window.location.origin + window.location.pathname + '?result=true&data=' + encodedResult;
+            localStorage.setItem('dateResult', JSON.stringify(resultData));
             showPage('acceptedPage');
+            alert('已接受！\n\n把这个链接发给你的ta，让他们知道结果：\n' + resultUrl);
         }
 
         // Handle cancel
         function handleCancel() {
-            if (invitationData) {
-                invitationData.status = 'declined';
-                localStorage.setItem('dateInvitation', JSON.stringify(invitationData));
-            }
+            // 生成结果链接，申请方打开这个链接可以看到结果
+            const resultData = { ...invitationData, status: 'declined' };
+            const encodedResult = btoa(JSON.stringify(resultData));
+            const resultUrl = window.location.origin + window.location.pathname + '?result=true&data=' + encodedResult;
+            localStorage.setItem('dateResult', JSON.stringify(resultData));
             showPage('declinedPage');
+            alert('已拒绝。\n\n把这个链接发给你的ta，让他们知道结果：\n' + resultUrl);
         }
         
         // Show specific page
         function showPage(pageId) {
-            const pages = ['formPage', 'confirmPage', 'successPage', 'acceptedPage', 'declinedPage', 'statusPage'];
+            const pages = ['formPage', 'confirmPage', 'successPage', 'acceptedPage', 'declinedPage', 'statusPage', 'resultPage'];
             pages.forEach(page => {
                 const el = document.getElementById(page);
                 if (el) {
@@ -498,6 +538,27 @@
         function init() {
             initDateInput();
             createFloatingHearts();
+            
+            // 结果页面（申请方通过链接查看对方的选择结果）
+            if (isResultMode && urlData) {
+                try {
+                    const data = JSON.parse(atob(urlData));
+                    document.getElementById('resultDate').textContent = data.dateDisplay;
+                    document.getElementById('resultTime').textContent = data.time;
+                    document.getElementById('resultLocation').textContent = data.location;
+                    
+                    const resultStatus = document.getElementById('resultStatus');
+                    if (data.status === 'accepted') {
+                        resultStatus.innerHTML = '<div class="success-message"><div class="success-icon">💕</div><div class="success-text">对方已接受！</div><div class="success-sub">期待你们的约会~</div></div>';
+                    } else {
+                        resultStatus.innerHTML = '<div class="declined-message"><div class="declined-icon">😢</div><div class="declined-text">对方已拒绝</div><div class="success-sub">也许下次吧~</div></div>';
+                    }
+                    showPage('resultPage');
+                    return;
+                } catch (e) {
+                    console.error('解析结果数据失败');
+                }
+            }
             
             if (isConfirmMode && invitationData) {
                 // Show confirmation page

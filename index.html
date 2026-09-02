@@ -341,7 +341,16 @@
                 <div class="success-icon">🎉</div>
                 <div class="success-text">申请已发送！</div>
                 <div class="success-sub">等待对方的确认~</div>
-                <button class="btn btn-primary" onclick="createNewInvitation()" style="margin-top: 30px;">创建新的申请</button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f6ff; border-radius: 12px; text-align: left;">
+                    <p style="font-weight: 500; margin-bottom: 10px;">📎 邀请链接（发送给ta）：</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="shareLink" readonly style="flex: 1; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 12px; background: white;">
+                        <button class="btn btn-primary" onclick="copyLink()" style="width: auto; padding: 10px 15px; margin: 0;">复制</button>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="createNewInvitation()" style="margin-top: 20px;">创建新的申请</button>
             </div>
         </div>
 
@@ -459,9 +468,20 @@
             // Generate shareable link with encoded data
             const encodedData = btoa(JSON.stringify(data));
             const shareUrl = window.location.origin + window.location.pathname + '?confirm=true&data=' + encodedData;
-            console.log('分享链接:', shareUrl);
-            alert('申请已创建！\n\n分享链接（发送给ta）：\n' + shareUrl);
+            
+            // Show success page with share link
+            document.getElementById('formPage').classList.add('hidden');
+            document.getElementById('successPage').classList.remove('hidden');
+            document.getElementById('shareLink').value = shareUrl;
         });
+
+        // Copy link function
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            alert('链接已复制！');
+        }
 
         // Handle confirmation
         function handleConfirm() {

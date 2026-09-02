@@ -165,12 +165,11 @@
         }
 
         /* The tricky cancel button */
+        /* The tricky cancel button - runs around the screen */
         .tricky-cancel {
-            position: relative;
-        }
-
-        .tricky-cancel:hover {
-            transform: none;
+            position: fixed;
+            z-index: 1000;
+            transition: all 0.15s ease-out;
         }
 
         .hidden {
@@ -263,9 +262,7 @@
             <form id="dateForm">
                 <div class="form-group">
                     <label>📅 约会日期</label>
-                    <select id="dateSelect" required>
-                        <option value="">请选择日期</option>
-                    </select>
+                    <input type="date" id="dateInput" required>
                 </div>
                 <div class="form-group">
                     <label>⏰ 约会时间</label>
@@ -358,32 +355,11 @@
         const storedData = localStorage.getItem('dateInvitation');
         let invitationData = storedData ? JSON.parse(storedData) : null;
 
-        // Initialize date options for this Friday to Sunday
-        function initDateOptions() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            
-            // Calculate days until Friday (5)
-            const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
-            const friday = new Date(today);
-            friday.setDate(today.getDate() + daysUntilFriday);
-            
-            const dateSelect = document.getElementById('dateSelect');
-            const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-            
-            // Add Friday, Saturday, Sunday options
-            for (let i = 0; i < 3; i++) {
-                const date = new Date(friday);
-                date.setDate(friday.getDate() + i);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayName = dayNames[date.getDay()];
-                const monthDay = `${date.getMonth() + 1}月${date.getDate()}日`;
-                
-                const option = document.createElement('option');
-                option.value = dateStr;
-                option.textContent = `${monthDay} ${dayName}`;
-                dateSelect.appendChild(option);
-            }
+        // Set minimum date to today
+        function initDateInput() {
+            const dateInput = document.getElementById('dateInput');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
         }
 
         // Create floating hearts
@@ -406,9 +382,14 @@
         document.getElementById('dateForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            const dateInput = document.getElementById('dateInput');
+            const date = new Date(dateInput.value);
+            const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const dateDisplay = `${date.getMonth() + 1}月${date.getDate()}日 ${dayNames[date.getDay()]}`;
+            
             const data = {
-                date: document.getElementById('dateSelect').value,
-                dateDisplay: document.getElementById('dateSelect').options[document.getElementById('dateSelect').selectedIndex].text,
+                date: dateInput.value,
+                dateDisplay: dateDisplay,
                 time: document.getElementById('timeInput').value,
                 location: document.getElementById('locationInput').value,
                 activities: document.getElementById('activitiesInput').value,
@@ -437,45 +418,27 @@
             showPage('acceptedPage');
         }
 
-        // Handle cancel - the tricky part!
-        let cancelAttempts = 0;
+        // Handle cancel - the button runs around the screen, cannot be clicked!
         function handleCancel() {
-            cancelAttempts++;
-            const cancelBtn = document.getElementById('cancelBtn');
-            
-            if (cancelAttempts < 3) {
-                // Move the button to a random position
-                const container = document.querySelector('.btn-group');
-                const containerRect = container.getBoundingClientRect();
-                const btnRect = cancelBtn.getBoundingClientRect();
-                
-                const maxX = containerRect.width - btnRect.width;
-                const maxY = 100;
-                
-                const newX = Math.random() * maxX;
-                const newY = Math.random() * maxY;
-                
-                cancelBtn.style.transform = `translate(${newX}px, ${newY}px)`;
-                
-                // Show different messages
-                const messages = [
-                    '真的不考虑一下吗？',
-                    '再想想嘛~',
-                    '确定要残忍拒绝吗？',
-                    '确定吗？确定吗？',
-                    '最后一次问你哦~'
-                ];
-                cancelBtn.textContent = '❌ ' + messages[Math.min(cancelAttempts - 1, messages.length - 1)];
-            } else {
-                // After several attempts, show declined page
-                if (invitationData) {
-                    invitationData.status = 'declined';
-                    localStorage.setItem('dateInvitation', JSON.stringify(invitationData));
-                }
-                showPage('declinedPage');
-            }
+            moveCancelButton();
         }
-
+        
+        function moveCancelButton() {
+            const cancelBtn = document.getElementById('cancelBtn');
+            const padding = 20;
+            const btnWidth = cancelBtn.offsetWidth;
+            const btnHeight = cancelBtn.offsetHeight;
+            
+            const maxX = window.innerWidth - btnWidth - padding;
+            const maxY = window.innerHeight - btnHeight - padding;
+            
+            const newX = Math.random() * maxX;
+            const newY = Math.random() * maxY;
+            
+            cancelBtn.style.left = newX + 'px';
+            cancelBtn.style.top = newY + 'px';
+        }
+        
         // Show specific page
         function showPage(pageId) {
             const pages = ['formPage', 'confirmPage', 'successPage', 'acceptedPage', 'declinedPage'];
@@ -496,7 +459,7 @@
 
         // Initialize
         function init() {
-            initDateOptions();
+            initDateInput();
             createFloatingHearts();
             
             if (isConfirmMode && invitationData) {
@@ -523,6 +486,18 @@
                     showPage('acceptedPage');
                 } else if (invitationData.status === 'declined') {
                     showPage('declinedPage');
+                } else {
+                    // Start the cancel button running around
+                    const cancelBtn = document.getElementById('cancelBtn');
+                    cancelBtn.addEventListener('mouseenter', moveCancelButton);
+                    cancelBtn.addEventListener('click', moveCancelButton);
+                    cancelBtn.addEventListener('touchstart', moveCancelButton);
+                    
+                    // Initial random position
+                    setTimeout(moveCancelButton, 500);
+                    
+                    // Keep moving periodically
+                    setInterval(moveCancelButton, 2000);
                 }
             }
         }

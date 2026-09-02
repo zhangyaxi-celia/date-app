@@ -272,7 +272,34 @@
                     <textarea id="messageInput" placeholder="想说些什么..." style="min-height: 80px;"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">💌 发送申请</button>
+                <button type="button" class="btn btn-secondary" onclick="showStatusPage()">📋 查看申请状态</button>
             </form>
+        </div>
+
+        <!-- Status Page -->
+        <div id="statusPage" class="hidden">
+            <div class="heart-icon">📋</div>
+            <h1>申请状态</h1>
+            <div class="invite-info" id="statusInfo">
+                <div class="info-item">
+                    <span class="info-label">📅 日期</span>
+                    <span class="info-value" id="statusDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">⏰ 时间</span>
+                    <span class="info-value" id="statusTime">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📍 地点</span>
+                    <span class="info-value" id="statusLocation">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">💝 项目</span>
+                    <span class="info-value" id="statusActivities">-</span>
+                </div>
+            </div>
+            <div id="statusResult"></div>
+            <button class="btn btn-primary" onclick="resetForm()">返回创建申请</button>
         </div>
 
         <!-- Confirmation Page (shown when URL has ?confirm=true) -->
@@ -314,7 +341,7 @@
                 <div class="success-icon">🎉</div>
                 <div class="success-text">申请已发送！</div>
                 <div class="success-sub">等待对方的确认~</div>
-                <button class="btn btn-primary" onclick="resetForm()" style="margin-top: 30px;">创建新的申请</button>
+                <button class="btn btn-primary" onclick="createNewInvitation()" style="margin-top: 30px;">创建新的申请</button>
             </div>
         </div>
 
@@ -420,7 +447,7 @@
         
         // Show specific page
         function showPage(pageId) {
-            const pages = ['formPage', 'confirmPage', 'successPage', 'acceptedPage', 'declinedPage'];
+            const pages = ['formPage', 'confirmPage', 'successPage', 'acceptedPage', 'declinedPage', 'statusPage'];
             pages.forEach(page => {
                 const el = document.getElementById(page);
                 if (el) {
@@ -429,11 +456,42 @@
             });
         }
 
+        // Show status page
+        function showStatusPage() {
+            const storedData = localStorage.getItem('dateInvitation');
+            if (!storedData) {
+                alert('暂无申请记录');
+                return;
+            }
+            
+            const data = JSON.parse(storedData);
+            document.getElementById('statusDate').textContent = data.dateDisplay;
+            document.getElementById('statusTime').textContent = data.time;
+            document.getElementById('statusLocation').textContent = data.location;
+            document.getElementById('statusActivities').textContent = data.activities;
+            
+            const statusResult = document.getElementById('statusResult');
+            if (data.status === 'accepted') {
+                statusResult.innerHTML = '<div class="success-message"><div class="success-icon">💕</div><div class="success-text">对方已接受！</div><div class="success-sub">期待你们的约会~</div></div>';
+            } else if (data.status === 'declined') {
+                statusResult.innerHTML = '<div class="declined-message"><div class="declined-icon">😢</div><div class="declined-text">对方已拒绝</div><div class="success-sub">也许下次吧~</div></div>';
+            } else {
+                statusResult.innerHTML = '<div style="text-align:center;padding:20px;color:#888;"><p>⏳ 等待对方确认中...</p><p style="margin-top:10px;font-size:14px;">记得把邀请链接发给ta哦~</p></div>';
+            }
+            
+            showPage('statusPage');
+        }
+
         // Reset form
         function resetForm() {
             document.getElementById('dateForm').reset();
             showPage('formPage');
-            cancelAttempts = 0;
+        }
+
+        function createNewInvitation() {
+            localStorage.removeItem('dateInvitation');
+            document.getElementById('dateForm').reset();
+            showPage('formPage');
         }
 
         // Initialize

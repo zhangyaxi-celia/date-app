@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💕 约会申请</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .heart-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        /* Confirmation Page Styles */
+        .confirm-container {
+            text-align: center;
+        }
+
+        .invite-info {
+            background: #f8f6ff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .invite-info h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #888;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-confirm {
+            flex: 2;
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background: #ff5252;
+            color: white;
+            position: relative;
+        }
+
+        /* The tricky cancel button */
+        .tricky-cancel {
+            position: relative;
+        }
+
+        .tricky-cancel:hover {
+            transform: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .success-text {
+            font-size: 24px;
+            color: #4caf50;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .success-sub {
+            color: #888;
+        }
+
+        .declined-message {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .declined-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .declined-text {
+            font-size: 24px;
+            color: #ff5252;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Floating hearts background */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.3;
+            animation: float 15s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+
+    <div class="container" id="app">
+        <!-- Form Page -->
+        <div id="formPage" class="confirm-container">
+            <div class="heart-icon">💕</div>
+            <h1>约会申请</h1>
+            <form id="dateForm">
+                <div class="form-group">
+                    <label>📅 约会日期</label>
+                    <select id="dateSelect" required>
+                        <option value="">请选择日期</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>⏰ 约会时间</label>
+                    <input type="time" id="timeInput" required>
+                </div>
+                <div class="form-group">
+                    <label>📍 约会地点</label>
+                    <input type="text" id="locationInput" placeholder="请输入约会地点" required>
+                </div>
+                <div class="form-group">
+                    <label>💝 约会项目</label>
+                    <textarea id="activitiesInput" placeholder="请输入想做的事情，比如：吃饭、看电影、逛街..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>💬 给ta的话</label>
+                    <textarea id="messageInput" placeholder="想说些什么..." style="min-height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">💌 发送申请</button>
+            </form>
+        </div>
+
+        <!-- Confirmation Page (shown when URL has ?confirm=true) -->
+        <div id="confirmPage" class="hidden">
+            <div class="heart-icon">💌</div>
+            <h1>约会邀请</h1>
+            <div class="invite-info">
+                <h2>你收到了一份约会邀请</h2>
+                <div class="info-item">
+                    <span class="info-label">📅 日期</span>
+                    <span class="info-value" id="confirmDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">⏰ 时间</span>
+                    <span class="info-value" id="confirmTime">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📍 地点</span>
+                    <span class="info-value" id="confirmLocation">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">💝 项目</span>
+                    <span class="info-value" id="confirmActivities">-</span>
+                </div>
+                <div class="info-item" id="messageRow">
+                    <span class="info-label">💬 ta说</span>
+                    <span class="info-value" id="confirmMessage">-</span>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-confirm" onclick="handleConfirm()">✅ 接受邀请</button>
+                <button class="btn btn-cancel tricky-cancel" id="cancelBtn" onclick="handleCancel()">❌ 残忍拒绝</button>
+            </div>
+        </div>
+
+        <!-- Success Page -->
+        <div id="successPage" class="hidden">
+            <div class="success-message">
+                <div class="success-icon">🎉</div>
+                <div class="success-text">申请已发送！</div>
+                <div class="success-sub">等待对方的确认~</div>
+                <button class="btn btn-primary" onclick="resetForm()" style="margin-top: 30px;">创建新的申请</button>
+            </div>
+        </div>
+
+        <!-- Accepted Page -->
+        <div id="acceptedPage" class="hidden">
+            <div class="success-message">
+                <div class="success-icon">💕</div>
+                <div class="success-text">已接受邀请！</div>
+                <div class="success-sub">期待你们的约会~</div>
+            </div>
+        </div>
+
+        <!-- Declined Page -->
+        <div id="declinedPage" class="hidden">
+            <div class="declined-message">
+                <div class="declined-icon">😢</div>
+                <div class="declined-text">已拒绝邀请</div>
+                <div class="success-sub">也许下次吧~</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const isConfirmMode = urlParams.get('confirm') === 'true';
+
+        // Get stored data
+        const storedData = localStorage.getItem('dateInvitation');
+        let invitationData = storedData ? JSON.parse(storedData) : null;
+
+        // Initialize date options for this Friday to Sunday
+        function initDateOptions() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            
+            // Calculate days until Friday (5)
+            const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
+            const friday = new Date(today);
+            friday.setDate(today.getDate() + daysUntilFriday);
+            
+            const dateSelect = document.getElementById('dateSelect');
+            const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            
+            // Add Friday, Saturday, Sunday options
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(friday);
+                date.setDate(friday.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = dayNames[date.getDay()];
+                const monthDay = `${date.getMonth() + 1}月${date.getDate()}日`;
+                
+                const option = document.createElement('option');
+                option.value = dateStr;
+                option.textContent = `${monthDay} ${dayName}`;
+                dateSelect.appendChild(option);
+            }
+        }
+
+        // Create floating hearts
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const hearts = ['💕', '💗', '💖', '💘', '💝'];
+            
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 15 + 's';
+                heart.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('dateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const data = {
+                date: document.getElementById('dateSelect').value,
+                dateDisplay: document.getElementById('dateSelect').options[document.getElementById('dateSelect').selectedIndex].text,
+                time: document.getElementById('timeInput').value,
+                location: document.getElementById('locationInput').value,
+                activities: document.getElementById('activitiesInput').value,
+                message: document.getElementById('messageInput').value,
+                status: 'pending'
+            };
+            
+            localStorage.setItem('dateInvitation', JSON.stringify(data));
+            
+            // Show success page
+            document.getElementById('formPage').classList.add('hidden');
+            document.getElementById('successPage').classList.remove('hidden');
+            
+            // Generate shareable link
+            const shareUrl = window.location.origin + window.location.pathname + '?confirm=true';
+            console.log('分享链接:', shareUrl);
+            alert('申请已创建！\n\n分享链接（发送给ta）：\n' + shareUrl);
+        });
+
+        // Handle confirmation
+        function handleConfirm() {
+            if (invitationData) {
+                invitationData.status = 'accepted';
+                localStorage.setItem('dateInvitation', JSON.stringify(invitationData));
+            }
+            showPage('acceptedPage');
+        }
+
+        // Handle cancel - the tricky part!
+        let cancelAttempts = 0;
+        function handleCancel() {
+            cancelAttempts++;
+            const cancelBtn = document.getElementById('cancelBtn');
+            
+            if (cancelAttempts < 3) {
+                // Move the button to a random position
+                const container = document.querySelector('.btn-group');
+                const containerRect = container.getBoundingClientRect();
+                const btnRect = cancelBtn.getBoundingClientRect();
+                
+                const maxX = containerRect.width - btnRect.width;
+                const maxY = 100;
+                
+                const newX = Math.random() * maxX;
+                const newY = Math.random() * maxY;
+                
+                cancelBtn.style.transform = `translate(${newX}px, ${newY}px)`;
+                
+                // Show different messages
+                const messages = [
+                    '真的不考虑一下吗？',
+                    '再想想嘛~',
+                    '确定要残忍拒绝吗？',
+                    '确定吗？确定吗？',
+                    '最后一次问你哦~'
+                ];
+                cancelBtn.textContent = '❌ ' + messages[Math.min(cancelAttempts - 1, messages.length - 1)];
+            } else {
+                // After several attempts, show declined page
+                if (invitationData) {
+                    invitationData.status = 'declined';
+                    localStorage.setItem('dateInvitation', JSON.stringify(invitationData));
+                }
+                showPage('declinedPage');
+            }
+        }
+
+        // Show specific page
+        function showPage(pageId) {
+            const pages = ['formPage', 'confirmPage', 'successPage', 'acceptedPage', 'declinedPage'];
+            pages.forEach(page => {
+                const el = document.getElementById(page);
+                if (el) {
+                    el.classList.toggle('hidden', page !== pageId);
+                }
+            });
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('dateForm').reset();
+            showPage('formPage');
+            cancelAttempts = 0;
+        }
+
+        // Initialize
+        function init() {
+            initDateOptions();
+            createFloatingHearts();
+            
+            if (isConfirmMode && invitationData) {
+                // Show confirmation page
+                showPage('confirmPage');
+                
+                // Fill in the data
+                document.getElementById('confirmDate').textContent = invitationData.dateDisplay;
+                document.getElementById('confirmTime').textContent = invitationData.time;
+                document.getElementById('confirmLocation').textContent = invitationData.location;
+                document.getElementById('confirmActivities').textContent = invitationData.activities;
+                
+                const messageRow = document.getElementById('messageRow');
+                const confirmMessage = document.getElementById('confirmMessage');
+                if (invitationData.message) {
+                    confirmMessage.textContent = invitationData.message;
+                    messageRow.classList.remove('hidden');
+                } else {
+                    messageRow.classList.add('hidden');
+                }
+                
+                // Check if already responded
+                if (invitationData.status === 'accepted') {
+                    showPage('acceptedPage');
+                } else if (invitationData.status === 'declined') {
+                    showPage('declinedPage');
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -159,17 +159,8 @@
 
         .btn-cancel {
             flex: 1;
-            background: #ff5252;
-            color: white;
-            position: relative;
-        }
-
-        /* The tricky cancel button */
-        /* The tricky cancel button - runs around the screen */
-        .tricky-cancel {
-            position: fixed;
-            z-index: 1000;
-            transition: all 0.15s ease-out;
+            background: #f0f0f0;
+            color: #666;
         }
 
         .hidden {
@@ -313,7 +304,7 @@
             </div>
             <div class="btn-group">
                 <button class="btn btn-confirm" onclick="handleConfirm()">✅ 接受邀请</button>
-                <button class="btn btn-cancel tricky-cancel" id="cancelBtn" onclick="handleCancel()">❌ 残忍拒绝</button>
+                <button class="btn btn-cancel" onclick="handleCancel()">❌ 残忍拒绝</button>
             </div>
         </div>
 
@@ -418,25 +409,13 @@
             showPage('acceptedPage');
         }
 
-        // Handle cancel - the button runs around the screen, cannot be clicked!
+        // Handle cancel
         function handleCancel() {
-            moveCancelButton();
-        }
-        
-        function moveCancelButton() {
-            const cancelBtn = document.getElementById('cancelBtn');
-            const padding = 20;
-            const btnWidth = cancelBtn.offsetWidth;
-            const btnHeight = cancelBtn.offsetHeight;
-            
-            const maxX = window.innerWidth - btnWidth - padding;
-            const maxY = window.innerHeight - btnHeight - padding;
-            
-            const newX = Math.random() * maxX;
-            const newY = Math.random() * maxY;
-            
-            cancelBtn.style.left = newX + 'px';
-            cancelBtn.style.top = newY + 'px';
+            if (invitationData) {
+                invitationData.status = 'declined';
+                localStorage.setItem('dateInvitation', JSON.stringify(invitationData));
+            }
+            showPage('declinedPage');
         }
         
         // Show specific page
@@ -486,18 +465,6 @@
                     showPage('acceptedPage');
                 } else if (invitationData.status === 'declined') {
                     showPage('declinedPage');
-                } else {
-                    // Start the cancel button running around
-                    const cancelBtn = document.getElementById('cancelBtn');
-                    cancelBtn.addEventListener('mouseenter', moveCancelButton);
-                    cancelBtn.addEventListener('click', moveCancelButton);
-                    cancelBtn.addEventListener('touchstart', moveCancelButton);
-                    
-                    // Initial random position
-                    setTimeout(moveCancelButton, 500);
-                    
-                    // Keep moving periodically
-                    setInterval(moveCancelButton, 2000);
                 }
             }
         }
